@@ -71,8 +71,8 @@ class AttentionModelNoSys(Model):
         if max_output_tokens is not None:
             max_tokens = max_output_tokens
         else:
-            # Use a large number instead of self.max_output_tokens to allow full generation
-            max_tokens = 2048  # Reasonable upper bound to prevent infinite loops
+            # Use a reasonable number instead of self.max_output_tokens to allow full generation
+            max_tokens = 512  # Reasonable upper bound to prevent infinite loops
 
         with torch.no_grad():  # Use no_grad to reduce memory usage
             for i in range(max_tokens):
