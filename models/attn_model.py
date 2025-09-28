@@ -79,13 +79,15 @@ class AttentionModel(Model):
 
         attention_maps = []
 
-        if max_output_tokens != None:
-            n_tokens = max_output_tokens
+        # Set maximum tokens limit - use provided limit or set a reasonable default to prevent infinite loops
+        if max_output_tokens is not None:
+            max_tokens = max_output_tokens
         else:
-            n_tokens = self.max_output_tokens
+            # Use a large number instead of self.max_output_tokens to allow full generation
+            max_tokens = 2048  # Reasonable upper bound to prevent infinite loops
 
         with torch.no_grad():
-            for i in range(n_tokens):
+            for i in range(max_tokens):
                 output = self.model(
                     input_ids=input_ids,
                     attention_mask=attention_mask,
@@ -101,6 +103,7 @@ class AttentionModel(Model):
                 generated_probs.append(probs[0, next_token_id.item()].item())
                 generated_tokens.append(next_token_id.item())
 
+                # Stop generation when EOS token is encountered
                 if next_token_id.item() == self.tokenizer.eos_token_id:
                     break
 
@@ -162,10 +165,15 @@ class AttentionModel(Model):
         attention_mask = model_inputs.attention_mask
         attention_maps = []
 
-        n_tokens = max_output_tokens if max_output_tokens else self.max_output_tokens
+        # Set maximum tokens limit - use provided limit or set a reasonable default to prevent infinite loops
+        if max_output_tokens is not None:
+            max_tokens = max_output_tokens
+        else:
+            # Use a large number instead of self.max_output_tokens to allow full generation
+            max_tokens = 2048  # Reasonable upper bound to prevent infinite loops
 
         with torch.no_grad():
-            for i in range(n_tokens):
+            for i in range(max_tokens):
                 # ✅ Chỉ tính attention cho token đầu tiên
                 output_attentions = (i == 0)
                 
@@ -193,6 +201,7 @@ class AttentionModel(Model):
                     attention_map = get_last_attn(attention_map)
                     attention_maps.append(attention_map)
 
+                # Stop generation when EOS token is encountered
                 if next_token_id.item() == self.tokenizer.eos_token_id:
                     break
 
