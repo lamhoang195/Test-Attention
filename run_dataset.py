@@ -45,6 +45,13 @@ def main(args):
         result = detector.detect(data['text'])
         detect = result[0]
         score = result[1]['focus_score']
+        generated_text = result[1]['generated_text']
+
+        # Print generated text for each sample
+        print(f"\n--- Sample {len(labels) + 1} ---")
+        print(f"Input: {data['text'][:100]}...")
+        print(f"Generated: {generated_text}")
+        print(f"Detection: {detect}, Score: {score:.3f}")
 
         labels.append(data['label'])
         predictions.append(detect)
