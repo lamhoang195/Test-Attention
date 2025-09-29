@@ -3,7 +3,7 @@ import numpy as np
 import re
 from typing import List, Tuple, Dict
 
-def extract_final_scores(filename: str = 'result.txt') -> Tuple[List[float], List[int], List[str]]:
+def extract_final_scores(filename: str = 'run_payload.txt') -> Tuple[List[float], List[int], List[str]]:
     """
     Extract final scores from result.txt and return scores, sample numbers, and labels
     
@@ -29,30 +29,64 @@ def extract_final_scores(filename: str = 'result.txt') -> Tuple[List[float], Lis
         print(f"Đã đọc file với encoding: {encoding}")
         print(f"Độ dài nội dung: {len(content)} ký tự")
         
-        # Tìm tất cả các dòng có pattern "Detection: True/False, Score: X.XXX"
+        # Parse định dạng từ run_payload.py:
+        # --sample X--
+        # Input: ...
+        # Output: ...
+        # Score: 0.123
+        # Detected Injection: True/False
+        # (dòng trống)
         lines = content.split('\n')
-        
+
         current_sample = None
+        pending_score = None
+        pending_detect = None
+
         for line in lines:
             line = line.strip()
-            
-            # Extract sample number from "--- Sample X ---"
-            if line.startswith('--- Sample '):
-                sample_match = re.search(r'--- Sample (\d+) ---', line)
+
+            # Header mẫu: --sample X--
+            if line.startswith('--sample '):
+                # Nếu đang có mẫu trước đó mà đủ dữ liệu, lưu lại
+                if current_sample is not None and pending_score is not None and pending_detect is not None:
+                    scores.append(pending_score)
+                    sample_numbers.append(current_sample)
+                    labels.append('Injection' if pending_detect else 'Normal')
+
+                # Bắt đầu mẫu mới
+                sample_match = re.search(r'^--sample\s+(\d+)--$', line)
                 if sample_match:
                     current_sample = int(sample_match.group(1))
-            
-            # Extract detection result and score
-            elif line.startswith('Detection: '):
-                detection_match = re.search(r'Detection:\s*(True|False),\s*Score:\s*([\d.]+)', line)
-                if detection_match and current_sample is not None:
-                    detection_str = detection_match.group(1)
-                    score = float(detection_match.group(2))
-                    
-                    scores.append(score)
-                    sample_numbers.append(current_sample)
-                    # Sử dụng detection result làm label
-                    labels.append('Injection' if detection_str == 'True' else 'Normal')
+                    pending_score = None
+                    pending_detect = None
+                else:
+                    current_sample = None
+                    pending_score = None
+                    pending_detect = None
+                continue
+
+            # Score line
+            if line.startswith('Score:'):
+                try:
+                    score_match = re.search(r'^Score:\s*([\d\.eE+-]+)', line)
+                    if score_match:
+                        pending_score = float(score_match.group(1))
+                except ValueError:
+                    pending_score = None
+                continue
+
+            # Detected Injection line
+            if line.startswith('Detected Injection:'):
+                det_match = re.search(r'^Detected Injection:\s*(True|False)', line, re.IGNORECASE)
+                if det_match:
+                    pending_detect = det_match.group(1).lower() == 'true'
+                continue
+
+        # Lưu mẫu cuối cùng nếu đủ dữ liệu
+        if current_sample is not None and pending_score is not None and pending_detect is not None:
+            scores.append(pending_score)
+            sample_numbers.append(current_sample)
+            labels.append('Injection' if pending_detect else 'Normal')
         
         print(f"Tìm thấy {len(scores)} mẫu dữ liệu")
         
@@ -160,11 +194,11 @@ def main():
     """Hàm chính để chạy visualization"""
     try:
         # Extract dữ liệu
-        print("Extracting final scores from result.txt...")
-        scores, sample_numbers, labels = extract_final_scores('result.txt')
+        print("Extracting final scores from run_payload.txt...")
+        scores, sample_numbers, labels = extract_final_scores('run_payload.txt')
         
         if not scores:
-            print("Không tìm thấy dữ liệu trong file result.txt")
+            print("Không tìm thấy dữ liệu trong file run_payload.txt")
             return
         
         print(f"Found {len(scores)} final scores")
