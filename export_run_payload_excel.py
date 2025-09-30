@@ -100,7 +100,7 @@ def parse_run_payload_text(input_path: str) -> List[Dict[str, Any]]:
 def write_excel(rows: List[Dict[str, Any]], output_path: str) -> None:
     wb = Workbook()
     ws = wb.active
-    ws.title = "run_payload"
+    ws.title = "qwen2_15_payload"
 
     headers = ["Sample", "Input", "Output", "Score", "Detected Injection"]
     ws.append(headers)
@@ -125,9 +125,9 @@ def write_excel(rows: List[Dict[str, Any]], output_path: str) -> None:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Convert run_payload.txt to Excel (run_payload.xlsx)")
-    parser.add_argument("--input", type=str, default="run_payload.txt", help="Path to run_payload.txt")
-    parser.add_argument("--output", type=str, default="run_payload.xlsx", help="Output Excel file path (.xlsx)")
+    parser = argparse.ArgumentParser(description="Convert qwen2_15_payload.txt to Excel (qwen2_15_payload.xlsx)")
+    parser.add_argument("--input", type=str, default="qwen2_15_payload.txt", help="Path to qwen2_15_payload.txt")
+    parser.add_argument("--output", type=str, default="qwen2_15_payload.xlsx", help="Output Excel file path (.xlsx)")
     args = parser.parse_args()
 
     rows = parse_run_payload_text(args.input)
