@@ -41,23 +41,22 @@ def main(args):
     labels, predictions, scores = [], [], []
     logs = []
 
-    for data in tqdm(test_data):
+    for idx, data in enumerate(tqdm(test_data), start=1):
+        # Keep outputs deterministic and independent across samples
+        set_seed(args.seed)
         result = detector.detect(data['text'])
         detect = result[0]
         score = result[1]['focus_score']
         generated_text = result[1]['generated_text']
 
-        # Print in requested format for each sample
-        print("\nInput:")
-        print(f"{data['text']}")
-        print("True Label:")
-        print(f"{data['label']}")
-        print("Output:")
-        print(f"{generated_text}")
-        print("Detected:")
-        print(f"{detect}")
-        print("Score:")
-        print(f"{score:.3f}")
+        # Match run_payload.py output format
+        output_one_line = generated_text.replace("\n", " ").strip()
+        print(f"--sample {idx}--")
+        print(f"Input: {data['text']}")
+        print(f"Output: {output_one_line}")
+        print(f"Score: {score}")
+        print(f"Detected Injection: {detect}")
+        print()
 
         labels.append(data['label'])
         predictions.append(detect)
