@@ -37,9 +37,6 @@ def main(args):
             if not text:
                 continue
 
-            # Reset seed for each inference to ensure consistency
-            set_seed(args.seed + idx)
-
             if args.fast:
                 result = detector.detect_fast(text)
             else:

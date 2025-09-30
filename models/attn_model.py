@@ -37,23 +37,6 @@ class AttentionModel(Model):
         attention_map = attention_maps[0]
         return len(attention_map), attention_map[0].shape[1]
 
-    def reset_model_state(self):
-        """Reset model state to ensure clean inference"""
-        # Reset any cached computations in the model
-        if hasattr(self.model, 'reset_cache'):
-            self.model.reset_cache()
-        
-        # Clear CUDA cache to prevent memory accumulation
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-            
-        # Ensure model is in eval mode
-        self.model.eval()
-        
-        # Clear any gradient computations
-        if hasattr(self.model, 'zero_grad'):
-            self.model.zero_grad()
-
     def inference(self, instruction, data, max_output_tokens=None):
         # Reset model state before each inference
         self.reset_model_state()
@@ -107,9 +90,6 @@ class AttentionModel(Model):
             max_tokens = 128  # Reasonable upper bound to prevent infinite loops
 
         with torch.no_grad():
-            # Set deterministic mode for consistent results
-            torch.use_deterministic_algorithms(True, warn_only=True)
-            
             for i in range(max_tokens):
                 output = self.model(
                     input_ids=input_ids,
@@ -151,6 +131,19 @@ class AttentionModel(Model):
 
         return generated_text, output_tokens, attention_maps, input_tokens, data_range, generated_probs
     
+    def reset_model_state(self):
+        """Reset model state to ensure consistent inference between different inputs"""
+        # Clear any cached states
+        if hasattr(self.model, 'past_key_values'):
+            self.model.past_key_values = None
+        
+        # Clear CUDA cache to prevent memory accumulation
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        
+        # Ensure model is in eval mode
+        self.model.eval()
+
     def inference_fast(self, instruction, data, max_output_tokens=None):
         """Fast inference - chỉ lấy attention từ token đầu tiên, greedy decoding"""
         # Reset model state before each inference
@@ -199,9 +192,6 @@ class AttentionModel(Model):
             max_tokens = 128  # Reasonable upper bound to prevent infinite loops
 
         with torch.no_grad():
-            # Set deterministic mode for consistent results
-            torch.use_deterministic_algorithms(True, warn_only=True)
-            
             for i in range(max_tokens):
                 # ✅ Chỉ tính attention cho token đầu tiên
                 output_attentions = (i == 0)
