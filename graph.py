@@ -3,7 +3,7 @@ import numpy as np
 import re
 from typing import List, Tuple, Dict, Optional
 
-def extract_final_scores_and_checks(filename: str = 'mistral_7b_payload.txt') -> Tuple[List[float], List[Optional[float]], List[int], List[str]]:
+def extract_final_scores_and_checks(filename: str = 'mistral_7b_deepset.txt') -> Tuple[List[float], List[Optional[float]], List[int], List[str]]:
     """
     Extract scores and optional checks from given file and return:
       - scores: List[float]
@@ -212,7 +212,7 @@ def create_visualizations(scores: List[float], checks: List[Optional[float]], sa
     
     # Adjust layout and save
     plt.tight_layout()
-    plt.savefig('mistral.png', dpi=300, bbox_inches='tight')
+    plt.savefig('mistral_deepset.png', dpi=300, bbox_inches='tight')
     plt.show()
     
     # Print statistics
@@ -249,7 +249,7 @@ def create_visualizations(scores: List[float], checks: List[Optional[float]], sa
         plt.grid(True, alpha=0.3)
         plt.legend()
         plt.tight_layout()
-        plt.savefig('mistral.png', dpi=300, bbox_inches='tight')
+        plt.savefig('mistral_deepset.png', dpi=300, bbox_inches='tight')
         plt.show()
 
 def main():
@@ -257,7 +257,7 @@ def main():
     try:
         # Extract dữ liệu
         print("Extracting scores and checks from mistral_7b_payload.txt...")
-        scores, checks, sample_numbers, labels = extract_final_scores_and_checks('mistral_7b_payload.txt')
+        scores, checks, sample_numbers, labels = extract_final_scores_and_checks('mistral_7b_deepset.txt')
         
         if not scores:
             print("Không tìm thấy dữ liệu trong file mistral_7b_payload.txt")
@@ -269,7 +269,7 @@ def main():
         # Tạo visualization
         create_visualizations(scores, checks, sample_numbers, labels)
         
-        print("Analysis complete! Charts saved as 'mistral.png' and 'mistral_7b_payload.png'")
+        print("Analysis complete! Charts saved as 'mistral_deepset.png' and 'mistral_7b_deepset.png'")
         
     except Exception as e:
         print(f"Lỗi: {e}")
