@@ -37,10 +37,11 @@ def main(args):
             if not text:
                 continue
 
-            if args.fast:
-                result = detector.detect_fast(text)
-            else:
-                result = detector.detect(text)
+            # Reset seed before each payload to keep outputs deterministic across multiple runs
+            set_seed(args.seed)
+
+            # Always use the standard detect path for consistency
+            result = detector.detect(text)
 
             idx += 1
             output_one_line = result[1]['generated_text'].replace("\n", " ").strip()

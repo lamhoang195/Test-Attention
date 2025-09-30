@@ -71,24 +71,5 @@ class AttentionDetector():
         }
     
     def detect_fast(self, data_prompt):
-        """Fast detection using optimized inference"""
-        # Measure generation time
-        start_time = time.time()
-        
-        # Sử dụng inference_fast nếu có, nếu không fallback về inference
-        if hasattr(self.model, 'inference_fast'):
-            generated_text, _, attention_maps, _, input_range, _ = self.model.inference_fast(
-                self.instruction, data_prompt)
-        else:
-            generated_text, _, attention_maps, _, input_range, _ = self.model.inference(
-                self.instruction, data_prompt)
-        
-        end_time = time.time()
-        generation_time = end_time - start_time
-
-        focus_score = self.attn2score(attention_maps, input_range)
-        return bool(focus_score <= self.threshold), {
-            "focus_score": focus_score,
-            "generated_text": generated_text,
-            "generation_time": generation_time
-        }
+        """Fast path delegates to the standard detection to ensure consistency"""
+        return self.detect(data_prompt)
