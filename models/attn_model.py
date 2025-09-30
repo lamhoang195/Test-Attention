@@ -38,9 +38,6 @@ class AttentionModel(Model):
         return len(attention_map), attention_map[0].shape[1]
 
     def inference(self, instruction, data, max_output_tokens=None):
-        # Reset model state before each inference
-        self.reset_model_state()
-        
         messages = [
             {"role": "system", "content": instruction},
             {"role": "user", "content": "Data: " + data}
@@ -131,24 +128,8 @@ class AttentionModel(Model):
 
         return generated_text, output_tokens, attention_maps, input_tokens, data_range, generated_probs
     
-    def reset_model_state(self):
-        """Reset model state to ensure consistent inference between different inputs"""
-        # Clear any cached states
-        if hasattr(self.model, 'past_key_values'):
-            self.model.past_key_values = None
-        
-        # Clear CUDA cache to prevent memory accumulation
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-        
-        # Ensure model is in eval mode
-        self.model.eval()
-
     def inference_fast(self, instruction, data, max_output_tokens=None):
         """Fast inference - chỉ lấy attention từ token đầu tiên, greedy decoding"""
-        # Reset model state before each inference
-        self.reset_model_state()
-        
         messages = [
             {"role": "system", "content": instruction},
             {"role": "user", "content": "Data: " + data}
