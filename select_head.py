@@ -126,17 +126,19 @@ def main(args):
     print("Testing dataset: ", args.dataset)
     print("Testing model: ", args.model_name)
     
+    '''
     for i in range(6):
         print(f"======== index pos (n={i}) =========")
         pos_index_div = find_pos_div_index(diff_map_mean, diff_map_std, n=i)
         print(pos_index_div)
         print(f"propotion: {len(pos_index_div)} ({len(pos_index_div)/(diff_map_mean.shape[0]*diff_map_mean.shape[1])})")
+    '''
         
-    # for i in [0.75, 0.5, 0.25, 0.1, 0.05, 0.01, 0.005, 0.001]:
-    #     print(f"======== index pos (n={i}) =========")
-    #     pos_index_div = find_top_div_index(diff_map_mean, diff_map_std, portion=i)
-    #     print(pos_index_div)
-    #     print(f"propotion: {len(pos_index_div)} ({len(pos_index_div)/(diff_map_mean.shape[0]*diff_map_mean.shape[1])})")
+    for i in [0.75, 0.5, 0.25, 0.1, 0.05, 0.01, 0.005, 0.001]:
+        print(f"======== index pos (n={i}) =========")
+        pos_index_div = find_top_div_index(diff_map_mean, diff_map_std, portion=i)
+        print(pos_index_div)
+        print(f"propotion: {len(pos_index_div)} ({len(pos_index_div)/(diff_map_mean.shape[0]*diff_map_mean.shape[1])})")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Open Prompt Injection Experiments')
